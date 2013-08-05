@@ -1,15 +1,21 @@
--- This is a fork of paths mod by Casimir (https://forum.minetest.net/viewtopic.php?id=3390).
--- Trail mod 0.1.0 by paramat.
+-- This is a fork of desire path mod by Casimir (https://forum.minetest.net/viewtopic.php?id=3390).
+-- Trail mod 0.1.1 by paramat.
 -- For latest stable Minetest and back to 0.4.4.
+-- Depends default.
 -- Licenses: Code CC BY-SA. Textures CC BY-SA. Textures are edited default Minetest textures.
--- The water sounds are from the ambience mod by Neuromancer,
--- and are by Robinhood76, http://www.freesound.org/people/Robinhood76/sounds/79657/, license CC BY-NC.
+-- The water sounds are from the ambience mod by Neuromancer (https://forum.minetest.net/viewtopic.php?id=2807),
+-- and are by Robinhood76 (http://www.freesound.org/people/Robinhood76/sounds/79657/) license CC BY-NC.
 
 -- Parameters
 
 local FOO = true -- (true/false) Enable footprints.
-local WORCHA = 0.05 -- % chance grass is worn to dirt.
-local FOOCHA = 1 -- % chance of footprints.
+local DIRCHA = 0.1 -- Chance walked grass is worn to dirt.
+local FUNCHA = 0.3 -- Per globalstep chance of running function.
+local FOOCHA = 1 -- Per player per node chance of footprint.
+
+local ERODE = true -- Enable footprint erosion.
+local EROINT = 67 -- Erosion interval.
+local EROCHA = 121 -- Erosion 1/x chance.
 
 -- Stuff
 
@@ -56,15 +62,6 @@ minetest.register_node("trail:desert_sand_walked", {
 	groups = {sand=1, crumbly=3, falling_node=1, not_in_creative_inventory=1},
 	drop = "default:desert_sand",
 	sounds = default.node_sound_sand_defaults(),
-})
-
-minetest.register_node("trail:gravel_walked", {
-	tiles = {"trail_gravel_footprint.png", "default_gravel.png"},
-	groups = {crumbly=2, falling_node=1, not_in_creative_inventory=1},
-	drop = "default:gravel",
-	sounds = default.node_sound_dirt_defaults({
-		footstep = {name="default_gravel_footstep", gain=0.45},
-	}),
 })
 
 minetest.register_node("trail:water_source_swam", {
@@ -154,7 +151,7 @@ minetest.register_node("trail:snow_block_walked", {
 
 if FOO then
 	minetest.register_globalstep(function(dtime)
-		if math.random() < 0.5 then
+		if math.random() < FUNCHA then
 			local env = minetest.env
 			for _,player in ipairs(minetest.get_connected_players()) do
 				if math.random() <= FOOCHA then
@@ -174,7 +171,7 @@ if FOO then
 						if n_ground == "default:dirt_with_grass" then
 							env:add_node(p_groundpl,{name="trail:dirt_with_grass_walked"})
 						elseif n_ground == "trail:dirt_with_grass_walked" then
-							if math.random() <= WORCHA then
+							if math.random() <= DIRCHA then
 								env:add_node(p_groundpl,{name="trail:dirt_walked"})
 							end
 						elseif n_ground == "default:dirt" then
@@ -183,8 +180,6 @@ if FOO then
 							env:add_node(p_groundpl,{name="trail:sand_walked"})
 						elseif n_ground == "default:desert_sand" then
 							env:add_node(p_groundpl,{name="trail:desert_sand_walked"})
-						elseif n_ground == "default:gravel" then
-							minetest.env:add_node(p_groundpl,{name="trail:gravel_walked"})
 						elseif n_snowpl == "default:water_source" then
 							env:add_node(p_snowpl,{name="trail:water_source_swam"})
 						elseif n_snow == "snow:snow" then
@@ -202,4 +197,36 @@ if FOO then
 			end
 		end
 	end)
+end
+
+-- Abm
+
+if ERODE then
+	minetest.register_abm({
+		nodenames = {
+			"trail:dirt_with_grass_walked",
+			"trail:dirt_walked",
+			"trail:sand_walked",
+			"trail:desert_sand_walked",
+			"trail:snow_walked",
+			"trail:snow_block_walked",
+		},
+		interval = EROINT,
+		chance = EROCHA,
+		action = function(pos, node, active_object_count, active_object_count_wider)
+			local env = minetest.env
+			local nodename = node.name
+			if nodename == "trail:dirt_with_grass_walked" or nodename == "trail:dirt_walked" then
+				env:add_node(pos,{name="default:dirt_with_grass"})
+			elseif nodename == "trail:sand_walked" then
+				env:add_node(pos,{name="default:sand"})
+			elseif nodename == "trail:desert_sand_walked" then
+				env:add_node(pos,{name="default:desert_sand"})
+			elseif nodename == "trail:snow_walked" then
+				env:add_node(pos,{name="snow:snow"})
+			elseif nodename == "trail:snow_block_walked" then
+				env:add_node(pos,{name="snow:snow_block"})
+			end
+		end
+	})
 end
