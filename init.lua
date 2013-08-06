@@ -1,5 +1,5 @@
 -- This is a fork of desire path mod by Casimir (https://forum.minetest.net/viewtopic.php?id=3390).
--- Trail mod 0.1.1 by paramat.
+-- Trail mod 0.1.2 by paramat.
 -- For latest stable Minetest and back to 0.4.4.
 -- Depends default.
 -- Licenses: Code CC BY-SA. Textures CC BY-SA. Textures are edited default Minetest textures.
@@ -13,7 +13,7 @@ local DIRCHA = 0.1 -- Chance walked grass is worn to dirt.
 local FUNCHA = 0.3 -- Per globalstep chance of running function.
 local FOOCHA = 1 -- Per player per node chance of footprint.
 
-local ERODE = true -- Enable footprint erosion.
+local ERO = true -- Enable footprint erosion.
 local EROINT = 67 -- Erosion interval.
 local EROCHA = 121 -- Erosion 1/x chance.
 
@@ -84,7 +84,7 @@ minetest.register_node("trail:water_source_swam", {
 	groups = {water=3, liquid=3, puts_out_fire=1, not_in_creative_inventory=1},
 	on_construct = function(pos)
 		if math.random(1, 2) == 1 then
-			minetest.sound_play("trail_water_bubbles", {gain = 0.2})
+			minetest.sound_play("trail_water_bubbles", {pos = pos, gain = 0.2})
 		end
 	end,
 })
@@ -201,7 +201,7 @@ end
 
 -- Abm
 
-if ERODE then
+if ERO then
 	minetest.register_abm({
 		nodenames = {
 			"trail:dirt_with_grass_walked",

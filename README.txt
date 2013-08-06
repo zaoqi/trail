@@ -1,5 +1,5 @@
 -- This is a fork of desire path mod by Casimir (https://forum.minetest.net/viewtopic.php?id=3390).
--- Trail mod 0.1.1 by paramat.
+-- Trail mod 0.1.2 by paramat.
 -- For latest stable Minetest and back to 0.4.4.
 -- Depends default.
 -- Licenses: Code CC BY-SA. Textures CC BY-SA. Textures are edited default Minetest textures.
@@ -18,8 +18,13 @@ Version 0.1.0
 
 Version 0.1.1
 -------------
-* Abm to erode footprints back to default nodes. Walked dirt heals to grass.
-* Remove footprints in gravel for lighter code, so now 2 dirts, 2 sands, 2 snows.
 * Improved textures.
-* Parameter FUNCHA to optimise per globalstep chance of running function. Currently 0.3 seems optimum, creating an almost continuous trail if FOOCHA = 1 (continuous is boring), and eliminating unecessary processing.
+* Parameter FUNCHA to optimise per globalstep chance of running function, currently 0.3 seems optimum.
 * Added license.txt.
+* Abm to erode footprints back to default nodes. Walked dirt heals to grass.
+* Remove footprints in gravel, now 2 dirts, 2 sands, 2 snows.
+
+Version 0.1.2
+-------------
+* Water sounds played positionally not globally duh.
+* Water sounds are now mono, edited, improved and correct format (ogg mono 44.1khz 96kbps).
