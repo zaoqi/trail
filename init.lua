@@ -1,21 +1,26 @@
 -- This is a fork of desire path mod by Casimir (https://forum.minetest.net/viewtopic.php?id=3390).
--- Trail mod 0.1.2 by paramat.
+-- Trail mod 0.2.0 by paramat.
 -- For latest stable Minetest and back to 0.4.4.
 -- Depends default.
--- Licenses: Code CC BY-SA. Textures CC BY-SA. Textures are edited default Minetest textures.
+-- Licenses: Code CC BY-SA. Textures CC BY-SA. Some textures are edited Minetest default textures.
 -- The water sounds are from the ambience mod by Neuromancer (https://forum.minetest.net/viewtopic.php?id=2807),
 -- and are by Robinhood76 (http://www.freesound.org/people/Robinhood76/sounds/79657/) license CC BY-NC.
 
 -- Parameters
 
 local FOO = true -- (true/false) Enable footprints.
-local DIRCHA = 0.1 -- Chance walked grass is worn to dirt.
-local FUNCHA = 0.3 -- Per globalstep chance of running function.
-local FOOCHA = 1 -- Per player per node chance of footprint.
+local FUNCHA = 0.3 -- 0.3 -- Per globalstep chance of running function.
+local FOOCHA = 1 -- 1 -- Per player per node chance of footprint.
+local TRACHA = 0.1 -- 0.1 -- Chance walked grass is worn and compacted to trail:trail.
+local ICECHA = 0.1 -- 0.1 -- Chance walked snow is compacted to snow:ice.
 
-local ERO = true -- Enable footprint erosion.
-local EROINT = 67 -- Erosion interval.
-local EROCHA = 121 -- Erosion 1/x chance.
+local EROSION = true -- Enable footprint erosion.
+local EROINT = 71 -- 71 -- Erosion interval.
+local EROCHA = 121 -- 121 -- Erosion 1/x chance.
+
+local REGROW = true -- Enable trail:trail regrowing to default:dirt_with_grass.
+local REGINT = 73 -- 73 -- Regrow interval.
+local REGCHA = 1331 -- 1331 -- Regrow 1/x chance.
 
 -- Stuff
 
@@ -41,6 +46,13 @@ minetest.register_node("trail:dirt_with_grass_walked", {
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name="default_grass_footstep", gain=0.4},
 	}),
+})
+
+minetest.register_node("trail:trail", {
+	tiles = {"trail_trailtop.png", "trail_trailside.png"},
+	groups = {crumbly=2, not_in_creative_inventory=1},
+	drop = "default:dirt",
+	sounds = default.node_sound_dirt_defaults(),
 })
 
 minetest.register_node("trail:dirt_walked", {
@@ -147,6 +159,31 @@ minetest.register_node("trail:snow_block_walked", {
 	}),
 })
 
+minetest.register_node("trail:wheat_walked", {
+	description = "Flattened Wheat",
+	tiles = {"trail_flat_wheat.png"},
+	drawtype = "nodebox",
+	sunlight_propagates = true,
+	paramtype = "light",
+	paramtype2 = "facedir",
+	groups = {snappy=3,flammable=2,plant=1,attached_node=1},
+	buildable_to = true,
+	drop = "",
+	node_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, -0.375, 0.5}
+		},
+	},
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, -0.375, 0.5}
+		},
+	},
+	sounds = default.node_sound_leaves_defaults(),
+})
+
 -- Globalstep function
 
 if FOO then
@@ -157,6 +194,7 @@ if FOO then
 				if math.random() <= FOOCHA then
 					local pos = player:getpos()
 					player_pos[player:get_player_name()] = {x=math.floor(pos.x+0.5),y=math.floor(pos.y+0.2),z=math.floor(pos.z+0.5)}
+					
 					local p_ground = {x=math.floor(pos.x+0.5),y=math.floor(pos.y+0.4),z=math.floor(pos.z+0.5)}
 					local n_ground  = env:get_node(p_ground).name
 					local p_groundpl = {x=math.floor(pos.x+0.5),y=math.floor(pos.y-0.5),z=math.floor(pos.z+0.5)}
@@ -164,15 +202,17 @@ if FOO then
 					local n_snow  = env:get_node(p_snow).name
 					local p_snowpl = {x=math.floor(pos.x+0.5),y=math.floor(pos.y+0.5),z=math.floor(pos.z+0.5)}
 					local n_snowpl  = env:get_node(p_snowpl).name
+					
 					if player_pos_previous[player:get_player_name()] == nil then break end
 					if player_pos[player:get_player_name()].x ~= player_pos_previous[player:get_player_name()].x
 					or player_pos[player:get_player_name()].y < player_pos_previous[player:get_player_name()].y
 					or player_pos[player:get_player_name()].z ~= player_pos_previous[player:get_player_name()].z then
+					
 						if n_ground == "default:dirt_with_grass" then
 							env:add_node(p_groundpl,{name="trail:dirt_with_grass_walked"})
 						elseif n_ground == "trail:dirt_with_grass_walked" then
-							if math.random() <= DIRCHA then
-								env:add_node(p_groundpl,{name="trail:dirt_walked"})
+							if math.random() <= TRACHA then
+								env:add_node(p_groundpl,{name="trail:trail"})
 							end
 						elseif n_ground == "default:dirt" then
 							env:add_node(p_groundpl,{name="trail:dirt_walked"})
@@ -182,10 +222,24 @@ if FOO then
 							env:add_node(p_groundpl,{name="trail:desert_sand_walked"})
 						elseif n_snowpl == "default:water_source" then
 							env:add_node(p_snowpl,{name="trail:water_source_swam"})
+						elseif n_snow == "farming:wheat_5" 
+						or n_snow == "farming:wheat_6"
+						or n_snow == "farming:wheat_7"
+						or n_snow == "farming:wheat_8" then
+							env:add_node(p_snowpl,{name="trail:wheat_walked", param2 = math.random(0, 1)})
 						elseif n_snow == "snow:snow" then
 							env:add_node(p_snowpl,{name="trail:snow_walked"})
+						elseif n_snow == "trail:snow_walked" then
+							if math.random() <= ICECHA then
+								env:add_node(p_groundpl,{name="snow:ice"})
+								env:dig_node(p_snowpl)
+							end
 						elseif n_ground == "snow:snow_block" then
 							env:add_node(p_groundpl,{name="trail:snow_block_walked"})
+						elseif n_ground == "trail:snow_block_walked" then
+							if math.random() <= ICECHA then
+								env:add_node(p_groundpl,{name="snow:ice"})
+							end
 						end
 					end
 					player_pos_previous[player:get_player_name()] = {
@@ -199,9 +253,9 @@ if FOO then
 	end)
 end
 
--- Abm
+-- ABM
 
-if ERO then
+if EROSION then
 	minetest.register_abm({
 		nodenames = {
 			"trail:dirt_with_grass_walked",
@@ -227,6 +281,20 @@ if ERO then
 			elseif nodename == "trail:snow_block_walked" then
 				env:add_node(pos,{name="snow:snow_block"})
 			end
+		end
+	})
+end
+
+if REGROW then
+	minetest.register_abm({
+		nodenames = {
+			"trail:trail",
+		},
+		interval = REGINT,
+		chance = REGCHA,
+		action = function(pos, node, active_object_count, active_object_count_wider)
+			local env = minetest.env
+			env:add_node(pos,{name="default:dirt_with_grass"})
 		end
 	})
 end
