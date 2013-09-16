@@ -1,5 +1,5 @@
 This is a fork of desire path mod by Casimir (https://forum.minetest.net/viewtopic.php?id=3390).
-Trail mod 0.2.0 by paramat.
+Trail mod 0.2.1 by paramat.
 For latest stable Minetest and back to 0.4.4.
 Depends default.
 Licenses: Code CC BY-SA. Textures CC BY-SA. Textures are edited default Minetest textures.
@@ -39,3 +39,7 @@ The nodes farming:wheat_5 to wheat_8 is now flattened to a 'crop circle' trail:f
 To create a path of trail nodes quickly increase parameter TRACHA to 0.5+ and retrace your footprints.
 The first pass over grass will leave medium-life footprints only, the second pass has a chance of wearing it to trail:trail nodes,
 this applies to snow and ice paths also.
+
+Version 0.2.1
+-------------
+Compatibility with farming mod bugfix: walked grass and walked dirt are now in the soil group to enable hoeing.

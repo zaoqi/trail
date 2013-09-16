@@ -1,5 +1,5 @@
 -- This is a fork of desire path mod by Casimir (https://forum.minetest.net/viewtopic.php?id=3390).
--- Trail mod 0.2.0 by paramat.
+-- Trail mod 0.2.1 by paramat.
 -- For latest stable Minetest and back to 0.4.4.
 -- Depends default.
 -- Licenses: Code CC BY-SA. Textures CC BY-SA. Some textures are edited Minetest default textures.
@@ -11,8 +11,8 @@
 local FOO = true -- (true/false) Enable footprints.
 local FUNCHA = 0.3 -- 0.3 -- Per globalstep chance of running function.
 local FOOCHA = 1 -- 1 -- Per player per node chance of footprint.
-local TRACHA = 0.1 -- 0.1 -- Chance walked grass is worn and compacted to trail:trail.
-local ICECHA = 0.1 -- 0.1 -- Chance walked snow is compacted to snow:ice.
+local TRACHA = 0.091 -- 0.091 -- Chance walked grass is worn and compacted to trail:trail.
+local ICECHA = 0.091 -- 0.091 -- Chance walked snow is compacted to snow:ice.
 
 local EROSION = true -- Enable footprint erosion.
 local EROINT = 71 -- 71 -- Erosion interval.
@@ -41,7 +41,7 @@ end)
 
 minetest.register_node("trail:dirt_with_grass_walked", {
 	tiles = {"trail_grass_footprint.png", "default_dirt.png", "default_dirt.png^default_grass_side.png"},
-	groups = {crumbly=3, not_in_creative_inventory=1},
+	groups = {crumbly=3, soil=1, not_in_creative_inventory=1},
 	drop = "default:dirt",
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name="default_grass_footstep", gain=0.4},
@@ -57,7 +57,7 @@ minetest.register_node("trail:trail", {
 
 minetest.register_node("trail:dirt_walked", {
 	tiles = {"trail_dirt_footprint.png", "default_dirt.png"},
-	groups = {crumbly=3, not_in_creative_inventory=1},
+	groups = {crumbly=3, soil=1, not_in_creative_inventory=1},
 	drop = "default:dirt",
 	sounds = default.node_sound_dirt_defaults(),
 })
