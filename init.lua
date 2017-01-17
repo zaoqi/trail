@@ -214,6 +214,10 @@ if FOO then
 						minetest.set_node(p_groundpl, {name = "trail:dirt_with_dry_grass"})
 					elseif n_ground == "default:dirt_with_snow" then
 						minetest.set_node(p_groundpl, {name = "trail:dirt_with_snow"})
+					elseif n_ground == "trail:dirt_with_snow" then
+						if math.random() <= ICECHA then
+							minetest.set_node(p_groundpl, {name = "trail:dirt_with_grass"})
+						end
 					elseif n_ground == "trail:dirt" or
 							n_ground == "trail:dirt_with_grass" or
 							n_ground == "trail:dirt_with_dry_grass" then
@@ -230,6 +234,10 @@ if FOO then
 
 					elseif n_snow == "default:snow" then
 						minetest.set_node(p_snowpl, {name = "trail:snow"})
+					elseif n_snow == "trail:snow" then
+						if math.random() <= ICECHA then
+							minetest.dig_node(p_snowpl)
+						end
 					elseif n_ground == "default:snowblock" then
 						minetest.set_node(p_groundpl, {name = "trail:snowblock"})
 					elseif n_ground == "trail:snowblock" then
